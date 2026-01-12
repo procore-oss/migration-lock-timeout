@@ -176,11 +176,14 @@ RSpec.describe ActiveRecord::Migration do
         end
       end
 
-      it 'runs migrate up without timeout' do
+      it 'runs migrate up with session-level timeout' do
         migration = AddMonkey.new
         expect_create_table
-        expect(ActiveRecord::Base.connection).not_to receive(:execute).
-          with("SET LOCAL lock_timeout = '5s'").
+        expect(ActiveRecord::Base.connection).to receive(:execute).
+          with("SET lock_timeout = '5s'").
+          and_call_original
+        expect(ActiveRecord::Base.connection).to receive(:execute).
+          with("RESET lock_timeout").
           and_call_original
         migration.migrate(:up)
       end
@@ -188,7 +191,9 @@ RSpec.describe ActiveRecord::Migration do
       it 'runs migrate down without timeout' do
         migration = AddMonkey.new
         expect(ActiveRecord::Base.connection).not_to receive(:execute).
-          with("SET LOCAL lock_timeout = '5s'")
+          with("SET lock_timeout = '5s'")
+        expect(ActiveRecord::Base.connection).not_to receive(:execute).
+          with("RESET lock_timeout")
         migration.migrate(:down)
       end
     end

@@ -70,7 +70,8 @@ set a timeout for a particular migration.
 
 ## disable_ddl_transaction!
 
-If you use `disable_ddl_transaction!`, no lock timeout will occur
+When you use `disable_ddl_transaction!`, the gem automatically switches to using a session-level lock timeout instead of a transaction-level timeout. This is necessary because non-transactional migrations don't run inside a database transaction, so the `SET LOCAL` command (which only applies within a transaction) wouldn't work.
+
 ```ruby
   class AddMonkey < ActiveRecord::Migration
 
@@ -80,6 +81,46 @@ If you use `disable_ddl_transaction!`, no lock timeout will occur
       create_table :monkey do |t|
         t.timestamps
       end
+    end
+  end
+```
+
+For this migration, the gem will execute:
+```psql
+SET lock_timeout = '5s';  -- Session-level timeout
+-- Your migration code runs here
+RESET lock_timeout;       -- Reset to default after migration
+```
+
+This is particularly useful for operations that require `disable_ddl_transaction!`, such as:
+- Creating indexes concurrently (`add_index :table, :column, algorithm: :concurrently`)
+- Adding columns with a default value in older PostgreSQL versions
+- Other operations that cannot run inside a transaction
+
+**Note:** The lock timeout is automatically reset after the migration completes to avoid affecting subsequent database operations.
+
+**Important:** If you need to disable the lock timeout for a specific non-transactional migration (for example, if the operation legitimately needs to wait longer for locks), you can combine `disable_ddl_transaction!` with `disable_lock_timeout!`:
+
+```ruby
+  class AddIndexConcurrently < ActiveRecord::Migration
+    disable_ddl_transaction!
+    disable_lock_timeout!  # Explicitly disable timeout for this migration
+
+    def change
+      add_index :large_table, :column, algorithm: :concurrently
+    end
+  end
+```
+
+Alternatively, you can set a custom timeout for the migration:
+
+```ruby
+  class AddIndexConcurrently < ActiveRecord::Migration
+    disable_ddl_transaction!
+    set_lock_timeout 30  # Wait up to 30 seconds for locks
+
+    def change
+      add_index :large_table, :column, algorithm: :concurrently
     end
   end
 ```
