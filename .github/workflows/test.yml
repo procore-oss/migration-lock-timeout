@@ -1,0 +1,46 @@
+name: Test
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  test:
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        ruby: ['3.1']
+        postgres: ['15.1']
+    runs-on: ${{ matrix.os }}
+    services:
+      postgres:
+        image: postgres:${{ matrix.postgres }}
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      POSTGRES_DB_HOST: postgres
+      POSTGRES_DB_USERNAME: postgres
+      POSTGRES_DB_DATABASE: postgres
+      POSTGRES_DB_PASSWORD: postgres
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
+      - name: Set up Ruby ${{ matrix.ruby }}
+        uses: ruby/setup-ruby@675dd7ba1b06c8786a1480d89c384f5620a42647 # v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+          bundler-cache: true
+      - name: Install Ruby Dependencies
+        run: bundle check || bundle install
+      - name: Install Appraisals Dependencies
+        run: bundle exec appraisal install
+      - name: Run Appraisals Tests
+        run: bundle exec appraisal rspec
