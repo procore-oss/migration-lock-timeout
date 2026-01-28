@@ -11,7 +11,7 @@ Gem::Specification.new do |spec|
 
   spec.summary       = "Ruby gem that adds a lock timeout to Active Record migrations"
   spec.description   = "Ruby gem that automatically adds a lock timeout to all Active Record migrations"
-  spec.homepage      = "http://github.com/procore/migration-lock-timeout"
+  spec.homepage      = "http://github.com/procore-oss/migration-lock-timeout"
   spec.license       = "MIT"
 
   # Prevent pushing this gem to RubyGems.org. To allow pushes either set the 'allowed_push_host'
