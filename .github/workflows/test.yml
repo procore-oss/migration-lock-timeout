@@ -11,7 +11,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        ruby: ['3.1']
+        ruby: ['3.2']
         postgres: ['15.1']
     runs-on: ${{ matrix.os }}
     services:
