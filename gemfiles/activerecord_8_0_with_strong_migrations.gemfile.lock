@@ -48,6 +48,7 @@ GEM
     logger (1.7.0)
     minitest (6.0.1)
       prism (~> 1.5)
+    mutex_m (0.3.0)
     pg (1.6.3-arm64-darwin)
     prism (1.9.0)
     rake (13.3.1)
@@ -79,8 +80,13 @@ PLATFORMS
 DEPENDENCIES
   activerecord (~> 8.0.0)
   appraisal
+  base64
+  benchmark
+  bigdecimal
   database_cleaner
+  logger
   migration-lock-timeout!
+  mutex_m
   pg (~> 1.1)
   rake (~> 13)
   rspec (~> 3.2)
