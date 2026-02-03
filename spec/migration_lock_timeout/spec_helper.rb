@@ -1,3 +1,4 @@
+require 'logger'
 require 'database_cleaner'
 
 RSpec.configure do |config|
