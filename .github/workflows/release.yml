@@ -12,10 +12,10 @@ jobs:
     outputs:
       changed: ${{ steps.check.outputs.any_changed }}
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Check if version has been updated
         id: check
-        uses: tj-actions/changed-files@3c4bc6fa0ca4718d438e0a4bd3ea81fbb0e6e2be # v44
+        uses: tj-actions/changed-files@9426d40962ed5378910ee2e21d5f8c6fcbf2dd96 # v47.0.6
         with:
           files: lib/migration_lock_timeout/version.rb
   release:
@@ -23,9 +23,9 @@ jobs:
     needs: version-check
     if: ${{ github.event_name == 'workflow_dispatch' || needs.version-check.outputs.changed == 'true' }}
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Set up Ruby
-        uses: ruby/setup-ruby@675dd7ba1b06c8786a1480d89c384f5620a42647 # v1
+        uses: ruby/setup-ruby@651ff0d62c5c79bed6d53ec518387aae20e72c1a # v1.329.0
         with:
           ruby-version: 3.2
           bundler-cache: true
@@ -33,11 +33,11 @@ jobs:
         run: bundle check --path=vendor/bundle || bundle install --path=vendor/bundle
       - name: Build gem file
         run: bundle exec rake build
-      - uses: fac/ruby-gem-setup-credentials-action@5f62d5f2f56a11c7422a92f81fbb29af01e1c00f # v2
+      - uses: fac/ruby-gem-setup-credentials-action@bae8d21718d412e238423ce9c968fc6110c2458f # v2.1.1
         with:
           user: ""
           key: rubygems
           token: ${{secrets.RUBY_GEMS_API_KEY}}
-      - uses: fac/ruby-gem-push-action@81d77bf568ff6659d7fae0f0c5a036bb0aeacb1a # v2
+      - uses: fac/ruby-gem-push-action@a581d2f0c7c8ac8e19f2df179eb2b50b6b8a4a3a # v2.6.0
         with:
           key: rubygems
